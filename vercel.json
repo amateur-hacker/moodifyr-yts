@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ],
+  "redirects": [{ "source": "/", "destination": "/api/v1", "permanent": true }],
+  "installCommand": "bun install",
+  "devCommand": "bun run dev",
+  "outputDirectory": "dist"
+}

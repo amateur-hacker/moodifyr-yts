@@ -1,0 +1,45 @@
+{
+  "name": "moodifyr-yts",
+  "type": "module",
+  "scripts": {
+    "vercel:dev": "vercel dev",
+    "vercel:deploy": "vercel && vercel --prod",
+    "dev": "tsx --watch ./src/index.ts",
+    "start:dev": "tsx ./src/app.ts",
+    "prebuild": "bun run format && bun run typecheck && bun run lint",
+    "build": "tsc-transpile-only && tsc-alias",
+    "build:watch": "bun run build && concurrently 'tsc -w' 'tsc-alias -w'",
+    "build:start": "bun run build && bun run ./dist/index.js",
+    "start": "node ./dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint ./src",
+    "lint:fix": "bun run lint --fix",
+    "format": "biome format ./src --write",
+    "lint:format": "bun run lint:fix && bun run format",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "clean:vercel": "rimraf .vercel",
+    "clean:modules": "rimraf node_modules"
+  },
+  "dependencies": {
+    "@hono-rate-limiter/redis": "^0.1.4",
+    "@hono/node-server": "^1.19.0",
+    "@vercel/kv": "^3.0.0",
+    "dotenv": "^16.6.1",
+    "hono": "^4.9.4",
+    "hono-rate-limiter": "^0.4.2",
+    "yt-search": "^2.13.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/yt-search": "^2.10.3",
+    "@types/node": "^22.18.0",
+    "concurrently": "^9.2.1",
+    "esbuild": "^0.24.2",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.16",
+    "tsc-transpile-only": "^0.0.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
