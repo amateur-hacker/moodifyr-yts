@@ -51,18 +51,54 @@ app.get("/", (c) => {
   return c.text("Hello it's a yt-search API.");
 });
 
-app.get("/yts", async (c) => {
+app.get("/search", async (c) => {
   const query = c.req.query("q");
+  const id = c.req.query("id");
 
-  if (!query) {
+  if (!query && !id) {
+    return c.json(
+      {
+        message: "Provide either 'q' or 'id' parameter",
+        success: false,
+        statusCode: 422,
+      },
+      422,
+    );
+  }
+
+  if (query && id) {
+    return c.json(
+      {
+        message: "Provide either 'q' or 'id' parameter, but not both",
+        success: false,
+        statusCode: 422,
+      },
+      422,
+    );
+  }
+
+  if (id) {
+    const results = await yts({ videoId: id });
+    if (!results || !results.videoId) {
+      return c.json(
+        { message: "Video not found", success: false, statusCode: 404 },
+        404,
+      );
+    }
+
     return c.json({
-      message: "Missing query parameter",
-      success: false,
-      statusCode: 422,
+      id: results.videoId,
+      title: results.title,
+      url: results.url,
+      thumbnail: results.thumbnail,
+      duration: {
+        timestamp: results.duration.timestamp,
+        seconds: results.duration.seconds,
+      },
     });
   }
 
-  const results = await yts(query);
+  const results = await yts(query as string);
   const filteredResults = results.videos.map((video) => ({
     id: video.videoId,
     title: video.title,
