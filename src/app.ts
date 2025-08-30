@@ -110,7 +110,7 @@ app.get("/search", async (c) => {
     },
   }));
 
-  return c.json(filteredResults);
+  return c.json({ success: true, songs: filteredResults });
 });
 
 export { app };
