@@ -51,11 +51,73 @@ app.get("/", (c) => {
   return c.text("Hello it's a yt-search API.");
 });
 
+// app.get("/search", async (c) => {
+//   const query = c.req.query("q");
+//   const id = c.req.query("id");
+//
+//   if (!query && !id) {
+//     return c.json(
+//       {
+//         message: "Provide either 'q' or 'id' parameter",
+//         success: false,
+//         statusCode: 422,
+//       },
+//       422,
+//     );
+//   }
+//
+//   if (query && id) {
+//     return c.json(
+//       {
+//         message: "Provide either 'q' or 'id' parameter, but not both",
+//         success: false,
+//         statusCode: 422,
+//       },
+//       422,
+//     );
+//   }
+//
+//   if (id) {
+//     const results = await yts({ videoId: id });
+//     if (!results || !results.videoId) {
+//       return c.json(
+//         { message: "Video not found", success: false, statusCode: 404 },
+//         404,
+//       );
+//     }
+//
+//     return c.json({
+//       id: results.videoId,
+//       title: results.title,
+//       url: results.url,
+//       thumbnail: results.thumbnail,
+//       duration: {
+//         timestamp: results.duration.timestamp,
+//         seconds: results.duration.seconds,
+//       },
+//     });
+//   }
+//
+//   const results = await yts(query as string);
+//   const filteredResults = results.videos.map((video) => ({
+//     id: video.videoId,
+//     title: video.title,
+//     url: video.url,
+//     thumbnail: video.thumbnail,
+//     duration: {
+//       timestamp: video.duration.timestamp,
+//       seconds: video.duration.seconds,
+//     },
+//   }));
+//
+//   return c.json({ success: true, songs: filteredResults });
+// });
+
 app.get("/search", async (c) => {
-  const query = c.req.query("q");
+  const q = c.req.query("q");
   const id = c.req.query("id");
 
-  if (!query && !id) {
+  if (!q && !id) {
     return c.json(
       {
         message: "Provide either 'q' or 'id' parameter",
@@ -66,7 +128,7 @@ app.get("/search", async (c) => {
     );
   }
 
-  if (query && id) {
+  if (q && id) {
     return c.json(
       {
         message: "Provide either 'q' or 'id' parameter, but not both",
@@ -77,6 +139,7 @@ app.get("/search", async (c) => {
     );
   }
 
+  // Case 1: Lookup by ID
   if (id) {
     const results = await yts({ videoId: id });
     if (!results || !results.videoId) {
@@ -87,18 +150,56 @@ app.get("/search", async (c) => {
     }
 
     return c.json({
-      id: results.videoId,
-      title: results.title,
-      url: results.url,
-      thumbnail: results.thumbnail,
-      duration: {
-        timestamp: results.duration.timestamp,
-        seconds: results.duration.seconds,
-      },
+      success: true,
+      songs: [
+        {
+          id: results.videoId,
+          title: results.title,
+          url: results.url,
+          thumbnail: results.thumbnail,
+          duration: {
+            timestamp: results.duration.timestamp,
+            seconds: results.duration.seconds,
+          },
+        },
+      ],
     });
   }
 
-  const results = await yts(query as string);
+  // Case 2: Multiple queries support (comma separated)
+  const queries = (q as string)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (queries.length > 1) {
+    // Run all queries in parallel
+    const allResults = await Promise.all(
+      queries.map(async (query) => {
+        const res = await yts(query);
+        return (
+          res?.videos.map((video) => ({
+            id: video.videoId,
+            title: video.title,
+            url: video.url,
+            thumbnail: video.thumbnail,
+            duration: {
+              timestamp: video.duration.timestamp,
+              seconds: video.duration.seconds,
+            },
+          })) ?? []
+        );
+      }),
+    );
+
+    return c.json({
+      success: true,
+      songs: allResults.flat(), // flatten all into one array
+    });
+  }
+
+  // Case 3: Single query (original behavior)
+  const results = await yts(queries[0]);
   const filteredResults = results.videos.map((video) => ({
     id: video.videoId,
     title: video.title,
