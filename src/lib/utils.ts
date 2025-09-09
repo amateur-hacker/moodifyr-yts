@@ -2,7 +2,7 @@ import { RedisStore } from "@hono-rate-limiter/redis";
 import { kv } from "@vercel/kv";
 import { type RateLimitInfo, rateLimiter } from "hono-rate-limiter";
 
-const rateLimit = ({ windowMs = 60_000, limit = 60 } = {}) => {
+const rateLimit = ({ windowMs = 60_000, limit = 10 } = {}) => {
   return rateLimiter({
     windowMs,
     limit,
