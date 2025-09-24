@@ -91,7 +91,6 @@ app.get("/search", async (c) => {
       song: {
         id: results.videoId,
         title: results.title,
-        url: results.url,
         thumbnail: results.thumbnail,
         duration: {
           timestamp: results.duration.timestamp,
@@ -105,7 +104,6 @@ app.get("/search", async (c) => {
   const filteredResults = results.videos.map((video) => ({
     id: video.videoId,
     title: video.title,
-    url: video.url,
     thumbnail: video.thumbnail,
     duration: {
       timestamp: video.duration.timestamp,
