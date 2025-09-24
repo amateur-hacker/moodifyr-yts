@@ -87,13 +87,16 @@ app.get("/search", async (c) => {
     }
 
     return c.json({
-      id: results.videoId,
-      title: results.title,
-      url: results.url,
-      thumbnail: results.thumbnail,
-      duration: {
-        timestamp: results.duration.timestamp,
-        seconds: results.duration.seconds,
+      success: true,
+      song: {
+        id: results.videoId,
+        title: results.title,
+        url: results.url,
+        thumbnail: results.thumbnail,
+        duration: {
+          timestamp: results.duration.timestamp,
+          seconds: results.duration.seconds,
+        },
       },
     });
   }
